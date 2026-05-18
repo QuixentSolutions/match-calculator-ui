@@ -31,9 +31,10 @@ Create a `.env` file in this folder:
 
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:5000
+EXPO_PUBLIC_MATCH_API_URL=http://localhost:5001
 ```
 
-> If using a physical device, replace `localhost` with your machine's local IP address (e.g. `192.168.1.5:5000`)
+> If using a physical device, replace `localhost` with your machine's local IP (e.g. `192.168.1.5`)
 
 ---
 
