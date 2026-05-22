@@ -1,14 +1,15 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Image, StyleSheet,
-  Alert, KeyboardAvoidingView, Platform, StatusBar, ScrollView,
+  Alert, ScrollView, StatusBar,
   NativeSyntheticEvent, TextInputKeyPressEventData,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { setItem } from '../../utils/storage';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
-import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import { Colors, FontSize, FontWeight } from '../../constants/theme';
 
 const OTP_LENGTH = 6;
 
@@ -43,7 +44,6 @@ export default function OtpScreen() {
 
   function handleChange(value: string, index: number) {
     const cleaned = value.replace(/[^0-9]/g, '');
-
     if (cleaned.length > 1) {
       const filled = cleaned.slice(0, OTP_LENGTH).split('');
       const next = Array(OTP_LENGTH).fill('');
@@ -53,12 +53,10 @@ export default function OtpScreen() {
       if (filled.length === OTP_LENGTH) verify(next);
       return;
     }
-
     const digit = cleaned.slice(-1);
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
-
     if (digit && index < OTP_LENGTH - 1) {
       inputs.current[index + 1]?.focus();
     } else if (digit && index === OTP_LENGTH - 1) {
@@ -78,77 +76,78 @@ export default function OtpScreen() {
     if (res.success) {
       setOtp(Array(OTP_LENGTH).fill(''));
       inputs.current[0]?.focus();
-      Alert.alert('OTP Resent', 'Check your server console for the new OTP.');
     } else {
       Alert.alert('Error', res.message ?? 'Failed to resend OTP.');
     }
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo + branding — same as login */}
-        <View style={styles.brand}>
+        {/* Header */}
+        <View style={styles.header}>
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
-            resizeMode="cover"
+            resizeMode="contain"
           />
-          <Text style={styles.heroTitle}>Understand Each{'\n'}Other Better</Text>
-          <Text style={styles.heroSub}>A private space for two people to discover their compatibility</Text>
+          <Text style={styles.title}>Verify Your Number</Text>
+          <Text style={styles.subtitle}>
+            Enter the 6-digit code sent to{'\n'}
+            <Text style={styles.mobile}>+91 {mobile}</Text>
+          </Text>
         </View>
 
-        {/* OTP card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Verify Your Number</Text>
-          <Text style={styles.cardSub}>
-            We sent a 6-digit code to{' '}
-            <Text style={styles.mobileText}>+91 {mobile}</Text>
-          </Text>
+        {/* OTP boxes */}
+        <Text style={styles.codeLabel}>Verification Code</Text>
+        <View style={styles.otpRow}>
+          {otp.map((digit, i) => (
+            <TextInput
+              key={i}
+              ref={(ref) => { inputs.current[i] = ref; }}
+              style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
+              value={digit}
+              onChangeText={(v) => handleChange(v, i)}
+              onKeyPress={(e) => handleKeyPress(e, i)}
+              keyboardType="number-pad"
+              maxLength={i === 0 ? OTP_LENGTH : 1}
+              selectTextOnFocus
+              textAlign="center"
+            />
+          ))}
+        </View>
 
-          <View style={styles.otpRow}>
-            {otp.map((digit, i) => (
-              <TextInput
-                key={i}
-                ref={(ref) => { inputs.current[i] = ref; }}
-                style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
-                value={digit}
-                onChangeText={(v) => handleChange(v, i)}
-                onKeyPress={(e) => handleKeyPress(e, i)}
-                keyboardType="number-pad"
-                maxLength={i === 0 ? OTP_LENGTH : 1}
-                selectTextOnFocus
-                textAlign="center"
-              />
-            ))}
-          </View>
+        {/* Resend */}
+        <View style={styles.resendRow}>
+          <Text style={styles.resendLabel}>Didn't receive the code? </Text>
+          <TouchableOpacity onPress={handleResend}>
+            <Text style={styles.resendLink}>Resend</Text>
+          </TouchableOpacity>
+        </View>
 
+        {/* Button */}
+        <View style={styles.btnWrap}>
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.btn, loading && styles.btnDisabled]}
             onPress={() => verify(otp)}
             disabled={loading}
             activeOpacity={0.85}
           >
-            <Text style={styles.buttonText}>{loading ? 'Verifying…' : 'Verify OTP'}</Text>
+            <Text style={styles.btnText}>{loading ? 'Verifying…' : 'Verify & Continue'}</Text>
           </TouchableOpacity>
-
-          <View style={styles.resendRow}>
-            <Text style={styles.resendLabel}>Didn't receive the code? </Text>
-            <TouchableOpacity onPress={handleResend}>
-              <Text style={styles.resendBtn}>Resend</Text>
-            </TouchableOpacity>
-          </View>
         </View>
+
+        {/* Back */}
+        <TouchableOpacity style={styles.backRow} onPress={() => router.back()}>
+          <Text style={styles.backText}>← Change number</Text>
+        </TouchableOpacity>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -157,90 +156,88 @@ const styles = StyleSheet.create({
 
   scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
-    paddingTop: Platform.OS === 'ios' ? 40 : 28,
-    paddingBottom: 32,
-    paddingHorizontal: Spacing.xl,
+    paddingTop: 32,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
   },
 
-  brand: {
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  logo: {
-    width: 104,
-    height: 104,
-    borderRadius: 20,
-    marginBottom: Spacing.lg,
-  },
-  heroTitle: {
-    fontSize: FontSize.xxxl,
-    fontWeight: FontWeight.extrabold,
-    color: Colors.primary,
-    textAlign: 'center',
-    lineHeight: 42,
-    marginBottom: Spacing.sm,
-  },
-  heroSub: {
-    fontSize: FontSize.md,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-
-  card: {
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 24,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.xl,
-  },
-  cardTitle: {
+  header: { alignItems: 'center', marginBottom: 36 },
+  logo: { width: 90, height: 90, marginBottom: 16 },
+  title: {
     fontSize: FontSize.xxl,
     fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
+    color: Colors.primary,
+    marginBottom: 8,
   },
-  cardSub: {
+  subtitle: {
     fontSize: FontSize.sm,
-    color: Colors.textMuted,
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: Spacing.lg,
   },
-  mobileText: { color: Colors.primary, fontWeight: FontWeight.bold },
+  mobile: { color: Colors.primary, fontWeight: FontWeight.bold },
+
+  codeLabel: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: FontWeight.medium,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
 
   otpRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: Spacing.xl,
+    gap: 8,
+    marginBottom: 24,
   },
   otpBox: {
-    width: 48, height: 58, borderRadius: Radius.md,
-    borderWidth: 2, borderColor: '#BDBDBD',
-    backgroundColor: '#FFFFFF',
-    fontSize: FontSize.xxl, fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
+    width: 44,
+    height: 54,
+    borderWidth: 1.5,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    fontSize: FontSize.xxl,
+    fontWeight: FontWeight.bold,
+    color: '#111',
+    backgroundColor: '#fff',
     textAlign: 'center',
     textAlignVertical: 'center',
     includeFontPadding: false,
     padding: 0,
-    marginHorizontal: 5,
-    ...Shadow.sm,
+    textAlignVertical: 'center',
   },
-  otpBoxFilled: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
+  otpBoxFilled: {
+    borderColor: Colors.primary,
+    color: Colors.primary,
+  },
 
-  button: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.md,
-    paddingVertical: 16,
+  resendRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
-    ...Shadow.lg,
+    marginBottom: 28,
   },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: FontSize.lg, fontWeight: FontWeight.bold },
+  resendLabel: { fontSize: 13, color: '#6B7280' },
+  resendLink: { fontSize: 13, color: Colors.primary, fontWeight: FontWeight.bold },
 
-  resendRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  resendLabel: { fontSize: FontSize.sm, color: Colors.textMuted },
-  resendBtn: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.bold },
+  btnWrap: { alignItems: 'center', marginBottom: 20 },
+  btn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    minWidth: 200,
+    alignItems: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  btnDisabled: { opacity: 0.6 },
+  btnText: { color: '#fff', fontSize: FontSize.lg, fontWeight: FontWeight.bold },
+
+  backRow: { alignItems: 'center' },
+  backText: { fontSize: 13, color: '#9CA3AF' },
 });

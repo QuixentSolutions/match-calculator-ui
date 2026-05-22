@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, KeyboardAvoidingView, Platform, ScrollView, StatusBar,
+  Alert, ScrollView, StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
@@ -45,10 +46,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
@@ -152,17 +150,17 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1, backgroundColor: Colors.primary },
   scroll: { flexGrow: 1 },
 
   header: {
     backgroundColor: Colors.primary,
-    paddingTop: 64, paddingBottom: 36,
+    paddingTop: 24, paddingBottom: 36,
     paddingHorizontal: Spacing.xl, alignItems: 'center',
   },
   headerStep: {
