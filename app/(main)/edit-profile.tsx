@@ -9,6 +9,7 @@ import { useAuth } from '../../context/auth';
 import { deleteItem } from '../../utils/storage';
 import { Gender, User } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import Constants from 'expo-constants';
 
 const AGE_OPTIONS = ['18–22', '23–27', '28–32', '33–37', '38–45', '45+'];
 const AGE_MAP: Record<string, number> = {
@@ -226,6 +227,10 @@ export default function EditProfileScreen() {
           >
             <Text style={styles.logoutBtnText}>Logout</Text>
           </TouchableOpacity>
+
+          <Text style={styles.versionText}>
+            v{Constants.expoConfig?.version ?? '1.0.0'}
+          </Text>
         </View>
       </ScrollView>
 
@@ -411,4 +416,12 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md, paddingVertical: 14, alignItems: 'center',
   },
   modalLogoutText: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: '#fff' },
+
+  versionText: {
+    textAlign: 'center',
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.sm,
+  },
 });

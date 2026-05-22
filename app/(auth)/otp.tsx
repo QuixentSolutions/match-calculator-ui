@@ -205,7 +205,6 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     includeFontPadding: false,
     padding: 0,
-    textAlignVertical: 'center',
   },
   otpBoxFilled: {
     borderColor: Colors.primary,

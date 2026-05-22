@@ -336,11 +336,11 @@ const styles = StyleSheet.create({
   dividerText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.textMuted },
 
   digitsRow: {
-    flexDirection: 'row', justifyContent: 'center',
+    flexDirection: 'row', justifyContent: 'space-between',
     marginBottom: Spacing.md,
   },
   digitBox: {
-    width: 48, height: 58, borderRadius: Radius.md,
+    width: 40, height: 54, borderRadius: Radius.md,
     borderWidth: 2, borderColor: '#BDBDBD',
     backgroundColor: '#FFFFFF',
     fontSize: FontSize.xxl, fontWeight: FontWeight.bold,
@@ -349,7 +349,6 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     includeFontPadding: false,
     padding: 0,
-    marginHorizontal: 5,
     ...Shadow.sm,
   },
   digitBoxFilled: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
