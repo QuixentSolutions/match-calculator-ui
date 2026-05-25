@@ -126,19 +126,16 @@ export default function QuestionsScreen() {
         <StatusBar barStyle="light-content" />
 
         <View style={styles.header}>
-          <View style={styles.backSection}>
-            <View style={styles.logoWrap}>
-              <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-            </View>
-            <TouchableOpacity onPress={() => router.replace('/(main)/home')} style={styles.backBtn}>
-              <Text style={styles.backText}>‹ Home</Text>
-            </TouchableOpacity>
+          <View style={styles.logoWrap}>
+            <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
           </View>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>Compatibility Quiz</Text>
             <Text style={styles.headerSub}>Your responses are saved</Text>
           </View>
-          <View style={{ width: 60 }} />
+          <TouchableOpacity onPress={() => router.replace('/(main)/home')} style={styles.backBtn}>
+            <Text style={styles.backText}>‹ Home</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Full progress bar */}
@@ -276,19 +273,16 @@ export default function QuestionsScreen() {
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
-        <View style={styles.backSection}>
-          <View style={styles.logoWrap}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-          </View>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>‹ Back</Text>
-          </TouchableOpacity>
+        <View style={styles.logoWrap}>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
         </View>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Compatibility Quiz</Text>
           <Text style={styles.headerSub}>{answeredCount} of {questions.length} answered</Text>
         </View>
-        <View style={{ width: 60 }} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backText}>‹ Back</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.progressTrack}>
@@ -370,21 +364,20 @@ const styles = StyleSheet.create({
   loaderText: { color: Colors.textMuted, fontSize: FontSize.sm },
 
   header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingTop: 52, paddingBottom: 16, paddingHorizontal: Spacing.md,
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: Spacing.lg,
     backgroundColor: Colors.primary,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
   },
-  backSection: { alignItems: 'flex-start', gap: 4 },
   logoWrap: {
     width: 40, height: 40, borderRadius: 10,
     backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', overflow: 'hidden',
   },
   logoImg: { width: 38, height: 38, borderRadius: 8 },
-  backBtn: { paddingVertical: 2 },
-  backText: { color: 'rgba(255,255,255,0.9)', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   headerCenter: { flex: 1, alignItems: 'center' },
-  headerTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#fff' },
+  headerTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: '#fff' },
   headerSub: { fontSize: FontSize.xs, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
+  backBtn: { width: 40, alignItems: 'flex-end' },
+  backText: { color: 'rgba(255,255,255,0.9)', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 
   progressTrack: { height: 4, backgroundColor: Colors.primaryLight },
   progressFill: { height: 4, backgroundColor: Colors.primaryDark },

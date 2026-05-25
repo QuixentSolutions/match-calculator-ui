@@ -9,6 +9,7 @@ export interface User {
   age: number;
   city: string;
   bio: string;
+  profileImage?: string;
 }
 
 export type ProfileCard = Pick<User, '_id' | 'name' | 'age' | 'gender' | 'city' | 'bio'>;

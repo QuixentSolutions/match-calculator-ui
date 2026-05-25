@@ -67,20 +67,26 @@ export default function ScoreScreen() {
   const config = getScoreConfig(score.compatibility);
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <StatusBar barStyle="light-content" />
 
+      {/* Standard header */}
+      <View style={styles.header}>
+        <View style={styles.logoWrap}>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
+        </View>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Compatibility Score</Text>
+          <Text style={styles.headerSub}>Your match result</Text>
+        </View>
+        <TouchableOpacity onPress={() => router.replace('/(main)/home')} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>‹ Home</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
       {/* Score Hero */}
       <View style={[styles.hero, { backgroundColor: config.bgColor }]}>
-        <View style={styles.backRow}>
-          <View style={styles.logoWrap}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-          </View>
-          <TouchableOpacity onPress={() => router.replace('/(main)/home')} style={styles.backBtn}>
-            <Text style={[styles.backText, { color: config.color }]}>‹ Home</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={[styles.scoreRing, { borderColor: config.color }]}>
           <Text style={[styles.scoreNumber, { color: config.color }]}>{score.compatibility}%</Text>
           <Text style={[styles.scoreUnit, { color: config.color }]}>match</Text>
@@ -161,7 +167,8 @@ export default function ScoreScreen() {
           <Text style={styles.homeBtnText}>Back to Home</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -181,18 +188,23 @@ const styles = StyleSheet.create({
   errorBtn: { backgroundColor: Colors.primary, borderRadius: Radius.md, paddingHorizontal: 32, paddingVertical: 14 },
   errorBtnText: { color: '#fff', fontWeight: FontWeight.bold, fontSize: FontSize.md },
 
-  hero: { paddingTop: 52, paddingBottom: 32, paddingHorizontal: Spacing.xl, alignItems: 'center' },
-  backRow: {
-    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center',
-    gap: 10, marginBottom: Spacing.lg,
+  header: {
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.primary,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
   },
   logoWrap: {
     width: 40, height: 40, borderRadius: 10,
     backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', overflow: 'hidden',
   },
   logoImg: { width: 38, height: 38, borderRadius: 8 },
-  backBtn: {},
-  backText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
+  headerCenter: { flex: 1, alignItems: 'center' },
+  headerTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: '#fff' },
+  headerSub: { fontSize: FontSize.xs, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
+  backBtn: { width: 40, alignItems: 'flex-end' },
+  backBtnText: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.9)', fontWeight: FontWeight.semibold },
+
+  hero: { paddingTop: 28, paddingBottom: 32, paddingHorizontal: Spacing.xl, alignItems: 'center' },
   scoreRing: {
     width: 150, height: 150, borderRadius: 75, borderWidth: 6,
     justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.md,

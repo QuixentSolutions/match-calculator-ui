@@ -1,16 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, StatusBar, ScrollView, Platform, Image,
+  ActivityIndicator, StatusBar, ScrollView, Image, Share, Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import QRCode from 'react-native-qrcode-svg';
+import ViewShot from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 import { api } from '../../api/client';
 import { ActiveMatch } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
 
 const CODE_LENGTH = 6;
-const CODE_TTL = 10 * 60; // 10 min in seconds
 
 export default function ConnectScreen() {
   const [activeMatch, setActiveMatch] = useState<ActiveMatch | null>(null);
@@ -27,6 +30,14 @@ export default function ConnectScreen() {
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState('');
   const inputs = useRef<(TextInput | null)[]>([]);
+
+  // QR share
+  const qrRef = useRef<ViewShot>(null);
+
+  // QR scanner
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
+  const scanLock = useRef(false);
 
   const router = useRouter();
 
@@ -53,6 +64,24 @@ export default function ConnectScreen() {
     return () => clearInterval(id);
   }, [codeExpiry]);
 
+  async function handleShare() {
+    if (!myCode) return;
+    try {
+      const uri = await qrRef.current?.capture?.();
+      if (uri && await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'image/png',
+          dialogTitle: 'Share your Ansora connect code',
+        });
+        return;
+      }
+    } catch {}
+    // Fallback to text share if image capture fails
+    await Share.share({
+      message: `Here's my Ansora connect code: ${formatCode(myCode)}\n\nEnter it in the Ansora app to connect with me!`,
+    });
+  }
+
   async function handleGenerateCode() {
     setGeneratingCode(true);
     const res = await api.generateCode();
@@ -62,6 +91,32 @@ export default function ConnectScreen() {
       setCodeExpiry(new Date(res.data.expiresAt));
     }
   }
+
+  async function handleOpenScanner() {
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result.granted) return;
+    }
+    scanLock.current = false;
+    setScannerOpen(true);
+  }
+
+  const handleScan = useCallback(async ({ data }: { data: string }) => {
+    if (scanLock.current) return;
+    const code = data.trim().replace(/\s/g, '');
+    if (!/^\d{6}$/.test(code)) return;
+    scanLock.current = true;
+    setScannerOpen(false);
+    setConnecting(true);
+    setConnectError('');
+    const res = await api.connectByCode(code);
+    setConnecting(false);
+    if (res.success) {
+      router.replace('/(main)/matches');
+    } else {
+      setConnectError(res.message ?? 'Invalid or expired code. Please try again.');
+    }
+  }, [router]);
 
   function formatTimer(s: number) {
     const m = Math.floor(s / 60);
@@ -73,7 +128,6 @@ export default function ConnectScreen() {
     return code.slice(0, 3) + ' ' + code.slice(3);
   }
 
-  // OTP-style digit input handlers
   function handleDigitChange(value: string, index: number) {
     const cleaned = value.replace(/[^0-9]/g, '');
 
@@ -166,26 +220,40 @@ export default function ConnectScreen() {
             <View style={styles.sectionCard}>
               <Text style={styles.sectionLabel}>Your Connect Code</Text>
               <Text style={styles.sectionDesc}>
-                Generate a 6-digit code and share it with your partner. Valid for 10 minutes.
+                Generate a 6-digit code and share it with your partner. Valid for 24 hours.
               </Text>
 
               {myCode && secondsLeft > 0 ? (
                 <>
-                  <View style={styles.codeDisplay}>
-                    <Text style={styles.codeText}>{formatCode(myCode)}</Text>
-                  </View>
+                  <ViewShot ref={qrRef} options={{ format: 'png', quality: 1 }}>
+                    <View style={styles.codeDisplay}>
+                      <Text style={styles.codeText}>{formatCode(myCode)}</Text>
+                      <View style={styles.qrWrap}>
+                        <QRCode value={myCode} size={160} color={Colors.primary} backgroundColor={Colors.primaryLight} />
+                      </View>
+                    </View>
+                  </ViewShot>
                   <View style={styles.timerRow}>
                     <Ionicons name="time-outline" size={14} color={Colors.textMuted} />
                     <Text style={styles.timerText}>Expires in {formatTimer(secondsLeft)}</Text>
                   </View>
-                  <TouchableOpacity
-                    style={styles.refreshBtn}
-                    onPress={handleGenerateCode}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.primary} />
-                    <Text style={styles.refreshBtnText}>Generate New Code</Text>
-                  </TouchableOpacity>
+                  <View style={styles.codeActionsRow}>
+                    <TouchableOpacity
+                      style={styles.shareBtn}
+                      onPress={handleShare}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="share-social-outline" size={18} color="#fff" />
+                      <Text style={styles.shareBtnText}>Share Code</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.refreshBtn}
+                      onPress={handleGenerateCode}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="refresh-outline" size={16} color={Colors.primary} />
+                    </TouchableOpacity>
+                  </View>
                 </>
               ) : (
                 <TouchableOpacity
@@ -214,7 +282,7 @@ export default function ConnectScreen() {
             {/* Enter Partner's Code */}
             <View style={styles.sectionCard}>
               <Text style={styles.sectionLabel}>Enter Partner's Code</Text>
-              <Text style={styles.sectionDesc}>Ask your partner for their 6-digit code and enter it below.</Text>
+              <Text style={styles.sectionDesc}>Type their 6-digit code or scan their QR code.</Text>
 
               <View style={styles.digitsRow}>
                 {digits.map((d, i) => (
@@ -244,13 +312,53 @@ export default function ConnectScreen() {
               {!!connectError && (
                 <Text style={styles.errorText}>{connectError}</Text>
               )}
+
+              <TouchableOpacity
+                style={styles.scanBtn}
+                onPress={handleOpenScanner}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="qr-code-outline" size={20} color={Colors.primary} />
+                <Text style={styles.scanBtnText}>Scan QR Code</Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
       </ScrollView>
+
+      {/* QR Scanner Modal */}
+      <Modal visible={scannerOpen} animationType="slide" onRequestClose={() => setScannerOpen(false)}>
+        <View style={styles.scannerContainer}>
+          <CameraView
+            style={StyleSheet.absoluteFill}
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+            onBarcodeScanned={handleScan}
+          />
+
+          {/* Viewfinder corners */}
+          <View style={styles.scanCornerTL} />
+          <View style={styles.scanCornerTR} />
+          <View style={styles.scanCornerBL} />
+          <View style={styles.scanCornerBR} />
+
+          {/* Hint */}
+          <View style={styles.aimHintWrap} pointerEvents="none">
+            <Text style={styles.aimHint}>Align your partner's QR code inside the frame</Text>
+          </View>
+
+          {/* Close button */}
+          <TouchableOpacity style={styles.scanCloseBtn} onPress={() => setScannerOpen(false)}>
+            <Ionicons name="close" size={28} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const CORNER = 28;
+const BORDER = 3;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
@@ -303,22 +411,34 @@ const styles = StyleSheet.create({
   codeDisplay: {
     backgroundColor: Colors.primaryLight, borderRadius: Radius.lg,
     paddingVertical: 20, alignItems: 'center', marginBottom: Spacing.sm,
-    borderWidth: 2, borderColor: Colors.primary + '40',
+    borderWidth: 2, borderColor: Colors.primary + '40', gap: 16,
   },
   codeText: {
     fontSize: 40, fontWeight: FontWeight.extrabold,
     color: Colors.primary, letterSpacing: 8,
+  },
+  qrWrap: {
+    padding: 12, backgroundColor: Colors.primaryLight, borderRadius: Radius.md,
   },
   timerRow: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     justifyContent: 'center', marginBottom: Spacing.md,
   },
   timerText: { fontSize: FontSize.xs, color: Colors.textMuted, fontWeight: FontWeight.medium },
-  refreshBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, paddingVertical: 10,
+  codeActionsRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4,
   },
-  refreshBtnText: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.semibold },
+  shareBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, backgroundColor: Colors.primary, borderRadius: Radius.md,
+    paddingVertical: 12, ...Shadow.sm,
+  },
+  shareBtnText: { color: '#fff', fontSize: FontSize.sm, fontWeight: FontWeight.bold },
+  refreshBtn: {
+    width: 44, height: 44, borderRadius: Radius.md,
+    borderWidth: 2, borderColor: Colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+  },
 
   generateBtn: {
     backgroundColor: Colors.primary, borderRadius: Radius.md,
@@ -362,5 +482,56 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: Spacing.xs, fontSize: FontSize.sm,
     color: Colors.error, textAlign: 'center', lineHeight: 20,
+  },
+
+  scanBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, marginTop: Spacing.md, paddingVertical: 13,
+    borderRadius: Radius.md, borderWidth: 2, borderColor: Colors.primary,
+  },
+  scanBtnText: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.primary },
+
+  // Scanner modal
+  scannerContainer: { flex: 1, backgroundColor: '#000' },
+
+  scanCornerTL: {
+    position: 'absolute', top: '25%', left: '15%',
+    width: CORNER, height: CORNER,
+    borderTopWidth: BORDER, borderLeftWidth: BORDER,
+    borderColor: '#fff', borderTopLeftRadius: 6,
+  },
+  scanCornerTR: {
+    position: 'absolute', top: '25%', right: '15%',
+    width: CORNER, height: CORNER,
+    borderTopWidth: BORDER, borderRightWidth: BORDER,
+    borderColor: '#fff', borderTopRightRadius: 6,
+  },
+  scanCornerBL: {
+    position: 'absolute', bottom: '25%', left: '15%',
+    width: CORNER, height: CORNER,
+    borderBottomWidth: BORDER, borderLeftWidth: BORDER,
+    borderColor: '#fff', borderBottomLeftRadius: 6,
+  },
+  scanCornerBR: {
+    position: 'absolute', bottom: '25%', right: '15%',
+    width: CORNER, height: CORNER,
+    borderBottomWidth: BORDER, borderRightWidth: BORDER,
+    borderColor: '#fff', borderBottomRightRadius: 6,
+  },
+
+  aimHintWrap: {
+    position: 'absolute', bottom: '20%', left: 0, right: 0, alignItems: 'center',
+  },
+  aimHint: {
+    color: 'rgba(255,255,255,0.85)', fontSize: FontSize.sm,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20,
+  },
+
+  scanCloseBtn: {
+    position: 'absolute', top: 52, right: 20,
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center', alignItems: 'center',
   },
 });

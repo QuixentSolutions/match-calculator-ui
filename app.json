@@ -23,7 +23,9 @@
       "bundleIdentifier": "com.quixentsolutions.ansora",
       "infoPlist": {
         "CFBundleDisplayName": "Ansora",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Allow Ansora to access your photos to set a profile picture.",
+        "NSCameraUsageDescription": "Allow Ansora to use your camera to scan your partner's QR code."
       }
     },
     "android": {
@@ -34,7 +36,12 @@
       },
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
-      "package": "com.quixentsolutions.ansora"
+      "package": "com.quixentsolutions.ansora",
+      "permissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -44,6 +51,18 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Ansora to use your camera to scan your partner's QR code."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Ansora to access your photos to set a profile picture."
+        }
+      ],
       [
         "expo-splash-screen",
         {

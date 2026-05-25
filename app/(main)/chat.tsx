@@ -72,19 +72,16 @@ export default function ChatScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.backSection}>
-          <View style={styles.logoWrap}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-          </View>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>‹ Back</Text>
-          </TouchableOpacity>
+        <View style={styles.logoWrap}>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
         </View>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{partnerName}</Text>
           <View style={styles.onlineDot} />
         </View>
-        <View style={{ width: 60 }} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backText}>‹ Back</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Messages list */}
@@ -165,21 +162,20 @@ const styles = StyleSheet.create({
   loaderWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingTop: 52, paddingBottom: 14, paddingHorizontal: Spacing.lg,
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: Spacing.lg,
     backgroundColor: Colors.primary,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
   },
-  backSection: { alignItems: 'flex-start', gap: 4 },
   logoWrap: {
     width: 40, height: 40, borderRadius: 10,
     backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', overflow: 'hidden',
   },
   logoImg: { width: 38, height: 38, borderRadius: 8 },
-  backBtn: { paddingVertical: 2 },
-  backText: { color: 'rgba(255,255,255,0.9)', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   headerCenter: { flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 },
-  headerTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#fff' },
+  headerTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: '#fff' },
   onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.success },
+  backBtn: { width: 40, alignItems: 'flex-end' },
+  backText: { color: 'rgba(255,255,255,0.9)', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 
   messagesList: { padding: Spacing.md, gap: 10, paddingBottom: 16, flexGrow: 1 },
 

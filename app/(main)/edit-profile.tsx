@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, Modal, KeyboardAvoidingView, Platform, ScrollView, StatusBar, ActivityIndicator, Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
@@ -37,6 +38,7 @@ export default function EditProfileScreen() {
   const [bioFocused, setBioFocused] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter();
@@ -53,10 +55,38 @@ export default function EditProfileScreen() {
         setAgeRange(u.age ? ageToRange(u.age) : null);
         setCity(u.city ?? '');
         setBio(u.bio ?? '');
+        if (u.profileImage) setUser(u);
       }
       setLoading(false);
     })();
   }, []);
+
+  async function handlePickImage() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow access to your photo library.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (result.canceled || !result.assets[0].base64) return;
+
+    const asset = result.assets[0];
+    const mimetype = asset.mimeType ?? 'image/jpeg';
+    setUploadingImage(true);
+    const res = await api.uploadProfileImage(asset.base64!, mimetype);
+    setUploadingImage(false);
+    if (res.success && res.data) {
+      setUser(prev => prev ? { ...prev, profileImage: res.data!.profileImage } : prev);
+    } else {
+      Alert.alert('Error', res.message ?? 'Failed to upload image');
+    }
+  }
 
   async function handleSave() {
     if (!name.trim()) { Alert.alert('Required', 'Please enter your name.'); return; }
@@ -111,9 +141,18 @@ export default function EditProfileScreen() {
 
         {/* Avatar section */}
         <View style={styles.avatarSection}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{initials}</Text>
-          </View>
+          <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8} style={styles.avatarCircle}>
+            {uploadingImage ? (
+              <ActivityIndicator color="#fff" />
+            ) : user?.profileImage ? (
+              <Image source={{ uri: user.profileImage }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{initials}</Text>
+            )}
+            <View style={styles.avatarEditBadge}>
+              <Text style={styles.avatarEditIcon}>✎</Text>
+            </View>
+          </TouchableOpacity>
           <Text style={styles.avatarName}>{user?.name || 'Your Name'}</Text>
           <Text style={styles.avatarMobile}>+91 {user?.mobile}</Text>
         </View>
@@ -297,12 +336,21 @@ const styles = StyleSheet.create({
     paddingBottom: 32, paddingTop: 8,
   },
   avatarCircle: {
-    width: 80, height: 80, borderRadius: 40,
+    width: 88, height: 88, borderRadius: 44,
     backgroundColor: 'rgba(255,255,255,0.25)',
     borderWidth: 3, borderColor: 'rgba(255,255,255,0.6)',
     justifyContent: 'center', alignItems: 'center', marginBottom: 10,
+    overflow: 'hidden',
   },
+  avatarImage: { width: 88, height: 88, borderRadius: 44 },
   avatarText: { color: '#fff', fontSize: FontSize.xxl, fontWeight: FontWeight.bold },
+  avatarEditBadge: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 26, height: 26, borderRadius: 13,
+    backgroundColor: Colors.primary, borderWidth: 2, borderColor: '#fff',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  avatarEditIcon: { color: '#fff', fontSize: 12 },
   avatarName: { color: '#fff', fontSize: FontSize.lg, fontWeight: FontWeight.bold },
   avatarMobile: { color: 'rgba(255,255,255,0.75)', fontSize: FontSize.sm, marginTop: 2 },
 

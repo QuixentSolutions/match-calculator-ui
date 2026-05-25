@@ -31,10 +31,16 @@ export const api = {
       { method: 'POST', body: JSON.stringify({ mobile, code }) },
     ),
 
-  saveProfile: (name: string, gender: string, age: number, city?: string, bio?: string) =>
+  saveProfile: (name: string, gender: string, age: number, city?: string, bio?: string, profileImage?: string) =>
     request<{ user: User }>('/auth/profile', {
       method: 'POST',
-      body: JSON.stringify({ name, gender, age, city, bio }),
+      body: JSON.stringify({ name, gender, age, city, bio, profileImage }),
+    }),
+
+  uploadProfileImage: (image: string, mimetype: string) =>
+    request<{ profileImage: string; user: User }>('/auth/upload-profile-image', {
+      method: 'POST',
+      body: JSON.stringify({ image, mimetype }),
     }),
 
   getMe: () => request<{ user: User }>('/auth/me'),
