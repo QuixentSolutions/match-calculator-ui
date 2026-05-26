@@ -9,6 +9,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { setItem } from '../../utils/storage';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
+import { registerForPushNotifications } from '../../utils/pushNotifications';
 import { Colors, FontSize, FontWeight } from '../../constants/theme';
 
 const OTP_LENGTH = 6;
@@ -34,6 +35,7 @@ export default function OtpScreen() {
       await setItem('token', res.data.token);
       setToken(res.data.token);
       setUser(res.data.user);
+      registerForPushNotifications();
       router.replace(res.data.profileComplete ? '/(main)/home' : '/(auth)/profile');
     } else {
       Alert.alert('Incorrect OTP', res.message ?? 'Invalid or expired OTP. Try again.');

@@ -16,7 +16,7 @@
     },
     "updates": {
       "enabled": true,
-      "url": "https://u.expo.dev/ansora"
+      "url": "https://u.expo.dev/7f93cdb3-5709-4c06-a903-a318e35b4a92"
     },
     "ios": {
       "supportsTablet": false,
@@ -91,7 +91,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": ""
+        "projectId": "7f93cdb3-5709-4c06-a903-a318e35b4a92"
       }
     },
     "owner": "quixent-solutions"
