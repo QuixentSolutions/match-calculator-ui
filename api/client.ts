@@ -45,6 +45,10 @@ export const api = {
 
   getMe: () => request<{ user: User }>('/auth/me'),
 
+  // Push notifications
+  savePushToken: (token: string) =>
+    request('/match/push-token', { method: 'POST', body: JSON.stringify({ token }) }),
+
   // Match — connect by 6-digit code
   generateCode: () =>
     request<{ code: string; expiresAt: string }>('/match/generate-code', { method: 'POST' }),

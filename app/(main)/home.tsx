@@ -225,33 +225,31 @@ export default function ConnectScreen() {
 
               {myCode && secondsLeft > 0 ? (
                 <>
+                  {/* Shareable QR card */}
                   <ViewShot ref={qrRef} options={{ format: 'png', quality: 1 }}>
-                    <View style={styles.codeDisplay}>
-                      <Text style={styles.codeText}>{formatCode(myCode)}</Text>
-                      <View style={styles.qrWrap}>
-                        <QRCode value={myCode} size={160} color={Colors.primary} backgroundColor={Colors.primaryLight} />
+                    <View style={styles.qrCard}>
+                      <Text style={styles.qrCardBrand}>Ansora</Text>
+                      <View style={styles.qrBox}>
+                        <QRCode value={myCode} size={180} color={Colors.primary} backgroundColor="#fff" />
                       </View>
+                      <Text style={styles.qrCardCode}>{formatCode(myCode)}</Text>
+                      <Text style={styles.qrCardHint}>Scan or enter code in Ansora app</Text>
                     </View>
                   </ViewShot>
+
                   <View style={styles.timerRow}>
                     <Ionicons name="time-outline" size={14} color={Colors.textMuted} />
                     <Text style={styles.timerText}>Expires in {formatTimer(secondsLeft)}</Text>
                   </View>
+
                   <View style={styles.codeActionsRow}>
-                    <TouchableOpacity
-                      style={styles.shareBtn}
-                      onPress={handleShare}
-                      activeOpacity={0.8}
-                    >
+                    <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.8}>
                       <Ionicons name="share-social-outline" size={18} color="#fff" />
-                      <Text style={styles.shareBtnText}>Share Code</Text>
+                      <Text style={styles.shareBtnText}>Share</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.refreshBtn}
-                      onPress={handleGenerateCode}
-                      activeOpacity={0.8}
-                    >
+                    <TouchableOpacity style={styles.refreshBtn} onPress={handleGenerateCode} activeOpacity={0.8}>
                       <Ionicons name="refresh-outline" size={16} color={Colors.primary} />
+                      <Text style={styles.refreshBtnText}>New Code</Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -408,37 +406,49 @@ const styles = StyleSheet.create({
   },
   sectionDesc: { fontSize: FontSize.sm, color: Colors.textSecondary, marginBottom: Spacing.md, lineHeight: 20 },
 
-  codeDisplay: {
-    backgroundColor: Colors.primaryLight, borderRadius: Radius.lg,
-    paddingVertical: 20, alignItems: 'center', marginBottom: Spacing.sm,
-    borderWidth: 2, borderColor: Colors.primary + '40', gap: 16,
+  // QR shareable card
+  qrCard: {
+    backgroundColor: '#fff', borderRadius: Radius.xl,
+    alignItems: 'center', paddingVertical: 24, paddingHorizontal: 20,
+    marginBottom: Spacing.sm, borderWidth: 1.5, borderColor: Colors.border,
+    gap: 12,
   },
-  codeText: {
-    fontSize: 40, fontWeight: FontWeight.extrabold,
-    color: Colors.primary, letterSpacing: 8,
+  qrCardBrand: {
+    fontSize: FontSize.sm, fontWeight: FontWeight.bold,
+    color: Colors.primary, letterSpacing: 2, textTransform: 'uppercase',
   },
-  qrWrap: {
-    padding: 12, backgroundColor: Colors.primaryLight, borderRadius: Radius.md,
+  qrBox: {
+    padding: 14, backgroundColor: '#fff', borderRadius: Radius.lg,
+    borderWidth: 2, borderColor: Colors.primaryLight,
   },
+  qrCardCode: {
+    fontSize: 32, fontWeight: FontWeight.extrabold,
+    color: Colors.primary, letterSpacing: 6,
+  },
+  qrCardHint: {
+    fontSize: FontSize.xs, color: Colors.textMuted, textAlign: 'center',
+  },
+
   timerRow: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    justifyContent: 'center', marginBottom: Spacing.md,
+    justifyContent: 'center', marginBottom: Spacing.sm,
   },
   timerText: { fontSize: FontSize.xs, color: Colors.textMuted, fontWeight: FontWeight.medium },
   codeActionsRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   shareBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, backgroundColor: Colors.primary, borderRadius: Radius.md,
-    paddingVertical: 12, ...Shadow.sm,
+    paddingVertical: 13, ...Shadow.sm,
   },
   shareBtnText: { color: '#fff', fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   refreshBtn: {
-    width: 44, height: 44, borderRadius: Radius.md,
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, borderRadius: Radius.md, paddingVertical: 13,
     borderWidth: 2, borderColor: Colors.primary,
-    alignItems: 'center', justifyContent: 'center',
   },
+  refreshBtnText: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.primary },
 
   generateBtn: {
     backgroundColor: Colors.primary, borderRadius: Radius.md,

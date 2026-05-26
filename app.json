@@ -38,6 +38,8 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.quixentsolutions.ansora",
       "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.CAMERA"
@@ -50,6 +52,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff",
+          "mode": "production"
+        }
+      ],
       "expo-secure-store",
       [
         "expo-camera",
