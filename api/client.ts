@@ -45,6 +45,8 @@ export const api = {
 
   getMe: () => request<{ user: User }>('/auth/me'),
 
+  deleteAccount: () => request('/auth/delete-account', { method: 'DELETE' }),
+
   // Push notifications
   savePushToken: (token: string) =>
     request('/match/push-token', { method: 'POST', body: JSON.stringify({ token }) }),

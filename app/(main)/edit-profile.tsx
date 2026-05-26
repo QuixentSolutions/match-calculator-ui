@@ -41,6 +41,8 @@ export default function EditProfileScreen() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
   const { setToken, setUser: clearAuthUser } = useAuth();
 
@@ -106,6 +108,15 @@ export default function EditProfileScreen() {
 
   async function handleLogout() {
     setLoggingOut(true);
+    await deleteItem('token');
+    setToken(null);
+    clearAuthUser(null);
+    router.replace('/(auth)/login');
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    await api.deleteAccount();
     await deleteItem('token');
     setToken(null);
     clearAuthUser(null);
@@ -267,6 +278,14 @@ export default function EditProfileScreen() {
             <Text style={styles.logoutBtnText}>Logout</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.deleteBtn}
+            onPress={() => setShowDeleteModal(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.deleteBtnText}>Delete Account</Text>
+          </TouchableOpacity>
+
           <Text style={styles.versionText}>
             v{Constants.expoConfig?.version ?? '1.0.0'}
           </Text>
@@ -304,6 +323,45 @@ export default function EditProfileScreen() {
                 {loggingOut
                   ? <ActivityIndicator size="small" color="#fff" />
                   : <Text style={styles.modalLogoutText}>Logout</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete account confirmation modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalIconWrap}>
+              <Text style={styles.modalIcon}>🗑️</Text>
+            </View>
+            <Text style={styles.modalTitle}>Delete Account</Text>
+            <Text style={styles.modalMsg}>
+              This will permanently delete your account and all your data. This action cannot be undone.
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowDeleteModal(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalLogoutBtn, deleting && { opacity: 0.6 }]}
+                onPress={handleDeleteAccount}
+                disabled={deleting}
+                activeOpacity={0.85}
+              >
+                {deleting
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={styles.modalLogoutText}>Delete</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -427,6 +485,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14, alignItems: 'center', marginTop: Spacing.md,
   },
   logoutBtnText: { color: Colors.error, fontSize: FontSize.md, fontWeight: FontWeight.semibold },
+
+  deleteBtn: {
+    paddingVertical: 14, alignItems: 'center', marginTop: Spacing.sm,
+  },
+  deleteBtnText: { color: Colors.textMuted, fontSize: FontSize.sm, fontWeight: FontWeight.medium, textDecorationLine: 'underline' },
 
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
