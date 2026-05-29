@@ -94,6 +94,7 @@
         "projectId": "7f93cdb3-5709-4c06-a903-a318e35b4a92"
       }
     },
-    "owner": "quixent-solutions"
+    "owner": "quixent-solutions",
+    "runtimeVersion": "1.0.0"
   }
 }
