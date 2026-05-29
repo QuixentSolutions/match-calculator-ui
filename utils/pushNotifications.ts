@@ -4,6 +4,8 @@ import { Platform } from 'react-native';
 import { api } from '../api/client';
 
 export async function registerForPushNotifications(): Promise<void> {
+  // Push notifications are not supported in Expo Go (removed in SDK 53)
+  if (Constants.appOwnership === 'expo') return;
   try {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
