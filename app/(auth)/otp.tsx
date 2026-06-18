@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { setItem } from '../../utils/storage';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
@@ -36,7 +37,13 @@ export default function OtpScreen() {
       setToken(res.data.token);
       setUser(res.data.user);
       registerForPushNotifications();
-      router.replace(res.data.profileComplete ? '/(main)/home' : '/(auth)/profile');
+      const pendingCode = await SecureStore.getItemAsync('pendingJoinCode');
+      if (pendingCode && res.data.profileComplete) {
+        await SecureStore.deleteItemAsync('pendingJoinCode');
+        router.replace({ pathname: '/(main)/home', params: { code: pendingCode } });
+      } else {
+        router.replace(res.data.profileComplete ? '/(main)/home' : '/(auth)/profile');
+      }
     } else {
       Alert.alert('Incorrect OTP', res.message ?? 'Invalid or expired OTP. Try again.');
       setOtp(Array(OTP_LENGTH).fill(''));

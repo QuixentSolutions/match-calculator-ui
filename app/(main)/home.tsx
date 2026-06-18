@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ActivityIndicator, StatusBar, ScrollView, Image, Share, Modal,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import QRCode from 'react-native-qrcode-svg';
@@ -40,6 +40,16 @@ export default function ConnectScreen() {
   const scanLock = useRef(false);
 
   const router = useRouter();
+  const { code: incomingCode } = useLocalSearchParams<{ code?: string }>();
+
+  useEffect(() => {
+    if (incomingCode && /^\d{6}$/.test(incomingCode)) {
+      const filled = incomingCode.split('');
+      setDigits(filled);
+      setTimeout(() => submitCode(filled), 200);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingCode]);
 
   useEffect(() => {
     (async () => {
@@ -64,8 +74,11 @@ export default function ConnectScreen() {
     return () => clearInterval(id);
   }, [codeExpiry]);
 
+  const joinUrl = myCode ? `https://api.quixentsolutions.com/join/${myCode}` : '';
+
   async function handleShare() {
     if (!myCode) return;
+    const shareText = `Connect with me on Ansora!\n\n${joinUrl}\n\nOr enter code manually: ${formatCode(myCode)}`;
     try {
       const uri = await qrRef.current?.capture?.();
       if (uri && await Sharing.isAvailableAsync()) {
@@ -76,10 +89,7 @@ export default function ConnectScreen() {
         return;
       }
     } catch {}
-    // Fallback to text share if image capture fails
-    await Share.share({
-      message: `Here's my Ansora connect code: ${formatCode(myCode)}\n\nEnter it in the Ansora app to connect with me!`,
-    });
+    await Share.share({ message: shareText });
   }
 
   async function handleGenerateCode() {
@@ -103,7 +113,10 @@ export default function ConnectScreen() {
 
   const handleScan = useCallback(async ({ data }: { data: string }) => {
     if (scanLock.current) return;
-    const code = data.trim().replace(/\s/g, '');
+    const raw = data.trim();
+    const code = raw.includes('/join/')
+      ? (raw.split('/join/').pop() ?? '').replace(/\s/g, '')
+      : raw.replace(/\s/g, '');
     if (!/^\d{6}$/.test(code)) return;
     scanLock.current = true;
     setScannerOpen(false);
@@ -230,7 +243,7 @@ export default function ConnectScreen() {
                     <View style={styles.qrCard}>
                       <Text style={styles.qrCardBrand}>Ansora</Text>
                       <View style={styles.qrBox}>
-                        <QRCode value={myCode} size={180} color={Colors.primary} backgroundColor="#fff" />
+                        <QRCode value={joinUrl} size={180} color={Colors.primary} backgroundColor="#fff" />
                       </View>
                       <Text style={styles.qrCardCode}>{formatCode(myCode)}</Text>
                       <Text style={styles.qrCardHint}>Scan or enter code in Ansora app</Text>
