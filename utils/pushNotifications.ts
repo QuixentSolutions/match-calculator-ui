@@ -1,12 +1,11 @@
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { api } from '../api/client';
 
 export async function registerForPushNotifications(): Promise<void> {
-  // Push notifications are not supported in Expo Go (removed in SDK 53)
   if (Constants.appOwnership === 'expo') return;
   try {
+    const Notifications = await import('expo-notifications');
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
         name: 'default',
@@ -21,10 +20,10 @@ export async function registerForPushNotifications(): Promise<void> {
       finalStatus = status;
     }
     if (finalStatus !== 'granted') return;
-
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    const projectId =
+      Constants.easConfig?.projectId ??
+      Constants.expoConfig?.extra?.eas?.projectId;
     if (!projectId) return;
-
     const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
     await api.savePushToken(tokenData.data);
   } catch {

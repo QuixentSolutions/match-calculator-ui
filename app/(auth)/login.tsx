@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { api } from '../../api/client';
 import { Colors, FontSize, FontWeight } from '../../constants/theme';
+import { PatternDecor } from '../../components/PatternBackground';
 
 export default function LoginScreen() {
   const [mobile, setMobile] = useState('');
@@ -30,11 +31,13 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <PatternDecor />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF5F7" />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: '#FFF5F7' }}
       >
         {/* Logo */}
         <View style={styles.header}>
@@ -85,7 +88,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#FFF5F7' },
 
   scroll: {
     flexGrow: 1,

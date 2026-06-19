@@ -1,23 +1,13 @@
 import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { getItem, deleteItem } from '../utils/storage';
 import { useState } from 'react';
 import { api } from '../api/client';
 import { User } from '../types';
 import { AuthContext } from '../context/auth';
 import { registerForPushNotifications } from '../utils/pushNotifications';
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +17,22 @@ export default function RootLayout() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const segments = useSegments();
+
+  useEffect(() => {
+    if (Constants.appOwnership !== 'expo') {
+      import('expo-notifications').then((Notifications) => {
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+            shouldShowBanner: true,
+            shouldShowList: true,
+          }),
+        });
+      });
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {

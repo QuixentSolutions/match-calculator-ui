@@ -12,6 +12,7 @@ import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
 import { registerForPushNotifications } from '../../utils/pushNotifications';
 import { Colors, FontSize, FontWeight } from '../../constants/theme';
+import { PatternDecor } from '../../components/PatternBackground';
 
 const OTP_LENGTH = 6;
 
@@ -92,11 +93,13 @@ export default function OtpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <PatternDecor />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF5F7" />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: '#FFF5F7' }}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -161,7 +164,7 @@ export default function OtpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#FFF5F7' },
 
   scroll: {
     flexGrow: 1,
