@@ -7,11 +7,10 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import QRCode from 'react-native-qrcode-svg';
-import ViewShot from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
 import { api } from '../../api/client';
 import { ActiveMatch } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import PatternBackground from '../../components/PatternBackground';
 
 const CODE_LENGTH = 6;
 
@@ -30,9 +29,6 @@ export default function ConnectScreen() {
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState('');
   const inputs = useRef<(TextInput | null)[]>([]);
-
-  // QR share
-  const qrRef = useRef<ViewShot>(null);
 
   // QR scanner
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -79,16 +75,6 @@ export default function ConnectScreen() {
   async function handleShare() {
     if (!myCode) return;
     const shareText = `Connect with me on Ansora!\n\n${joinUrl}\n\nOr enter code manually: ${formatCode(myCode)}`;
-    try {
-      const uri = await qrRef.current?.capture?.();
-      if (uri && await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, {
-          mimeType: 'image/png',
-          dialogTitle: 'Share your Ansora connect code',
-        });
-        return;
-      }
-    } catch {}
     await Share.share({ message: shareText });
   }
 
@@ -195,7 +181,7 @@ export default function ConnectScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <PatternBackground>
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
@@ -238,17 +224,15 @@ export default function ConnectScreen() {
 
               {myCode && secondsLeft > 0 ? (
                 <>
-                  {/* Shareable QR card */}
-                  <ViewShot ref={qrRef} options={{ format: 'png', quality: 1 }}>
-                    <View style={styles.qrCard}>
-                      <Text style={styles.qrCardBrand}>Ansora</Text>
-                      <View style={styles.qrBox}>
-                        <QRCode value={joinUrl} size={180} color={Colors.primary} backgroundColor="#fff" />
-                      </View>
-                      <Text style={styles.qrCardCode}>{formatCode(myCode)}</Text>
-                      <Text style={styles.qrCardHint}>Scan or enter code in Ansora app</Text>
+                  {/* QR card */}
+                  <View style={styles.qrCard}>
+                    <Text style={styles.qrCardBrand}>Ansora</Text>
+                    <View style={styles.qrBox}>
+                      <QRCode value={joinUrl} size={180} color={Colors.primary} backgroundColor="#fff" />
                     </View>
-                  </ViewShot>
+                    <Text style={styles.qrCardCode}>{formatCode(myCode)}</Text>
+                    <Text style={styles.qrCardHint}>Scan or enter code in Ansora app</Text>
+                  </View>
 
                   <View style={styles.timerRow}>
                     <Ionicons name="time-outline" size={14} color={Colors.textMuted} />
@@ -364,7 +348,7 @@ export default function ConnectScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
-    </View>
+    </PatternBackground>
   );
 }
 

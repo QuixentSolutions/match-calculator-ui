@@ -5,10 +5,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/auth';
 import { Gender } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import { PatternDecor } from '../../components/PatternBackground';
 
 const AGE_OPTIONS = ['18–22', '23–27', '28–32', '33–37', '38–45', '45+'];
 const AGE_MAP: Record<string, number> = {
@@ -39,7 +41,13 @@ export default function ProfileScreen() {
 
     if (res.success && res.data) {
       setUser(res.data.user);
-      router.replace('/(main)/home');
+      const pendingCode = await SecureStore.getItemAsync('pendingJoinCode');
+      if (pendingCode) {
+        await SecureStore.deleteItemAsync('pendingJoinCode');
+        router.replace({ pathname: '/(main)/home', params: { code: pendingCode } });
+      } else {
+        router.replace('/(main)/home');
+      }
     } else {
       Alert.alert('Error', res.message ?? 'Failed to save profile');
     }
@@ -47,8 +55,9 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <PatternDecor />
       <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} style={{ backgroundColor: '#FFF5F7' }}>
 
         <View style={styles.header}>
           <Text style={styles.headerStep}>STEP 1 OF 1</Text>
@@ -155,7 +164,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.primary },
+  container: { flex: 1, backgroundColor: '#FFF5F7' },
   scroll: { flexGrow: 1 },
 
   header: {
@@ -175,7 +184,7 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.75)', textAlign: 'center' },
 
   form: {
-    backgroundColor: Colors.background,
+    backgroundColor: '#FFF5F7',
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     marginTop: -20, padding: Spacing.xl, paddingBottom: 40,
   },
