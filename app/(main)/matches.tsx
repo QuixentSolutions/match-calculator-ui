@@ -9,6 +9,7 @@ import { api } from '../../api/client';
 import { getItem, setItem } from '../../utils/storage';
 import { ActiveMatch } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import PatternBackground from '../../components/PatternBackground';
 
 const SEEN_KEY = 'chat_seen_counts';
 
@@ -72,13 +73,13 @@ export default function MatchesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <PatternBackground>
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
-        <View style={styles.logoWrap}>
+        <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-        </View>
+        </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>My Matches</Text>
           <Text style={styles.headerSub}>
@@ -127,7 +128,7 @@ export default function MatchesScreen() {
           />
         )}
       />
-    </View>
+    </PatternBackground>
   );
 }
 

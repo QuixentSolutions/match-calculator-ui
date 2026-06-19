@@ -7,6 +7,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '../../api/client';
 import { ChatMessage } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import { PatternDecor } from '../../components/PatternBackground';
 
 export default function ChatScreen() {
   const { matchId, partnerName: partnerNameParam } = useLocalSearchParams<{
@@ -68,13 +69,14 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
+      <PatternDecor />
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.logoWrap}>
+        <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-        </View>
+        </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{partnerName}</Text>
           <View style={styles.onlineDot} />
@@ -91,6 +93,7 @@ export default function ChatScreen() {
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.messagesList}
         showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: '#FFF5F7' }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
         ListEmptyComponent={
           <View style={styles.emptyChat}>
@@ -158,7 +161,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1, backgroundColor: '#FFF5F7' },
   loaderWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   header: {

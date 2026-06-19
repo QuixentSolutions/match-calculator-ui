@@ -11,6 +11,7 @@ import { deleteItem } from '../../utils/storage';
 import { Gender, User } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
 import Constants from 'expo-constants';
+import { PatternDecor } from '../../components/PatternBackground';
 
 const AGE_OPTIONS = ['18–22', '23–27', '28–32', '33–37', '38–45', '45+'];
 const AGE_MAP: Record<string, number> = {
@@ -133,14 +134,15 @@ export default function EditProfileScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <PatternDecor />
       <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} style={{ backgroundColor: '#FFF5F7' }}>
 
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.logoWrap}>
+          <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
             <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-          </View>
+          </TouchableOpacity>
           <Text style={[styles.headerTitle, { flex: 1, textAlign: 'center' }]}>My Profile</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -368,7 +370,7 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1, backgroundColor: '#FFF5F7' },
   loaderWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scroll: { flexGrow: 1, paddingBottom: 100 },
 

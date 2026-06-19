@@ -7,6 +7,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '../../api/client';
 import { Question, ActiveMatch } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import PatternBackground from '../../components/PatternBackground';
 
 export default function QuestionsScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
@@ -122,20 +123,18 @@ export default function QuestionsScreen() {
     const bothDone = partnerDone && myCount >= total;
 
     return (
-      <View style={styles.container}>
+      <PatternBackground>
         <StatusBar barStyle="light-content" />
 
         <View style={styles.header}>
-          <View style={styles.logoWrap}>
+          <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
             <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-          </View>
+          </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>Compatibility Quiz</Text>
             <Text style={styles.headerSub}>Your responses are saved</Text>
           </View>
-          <TouchableOpacity onPress={() => router.replace('/(main)/home')} style={styles.backBtn}>
-            <Text style={styles.backText}>‹ Home</Text>
-          </TouchableOpacity>
+          <View style={{ width: 40 }} />
         </View>
 
         {/* Full progress bar */}
@@ -259,7 +258,7 @@ export default function QuestionsScreen() {
             </View>
           )}
         </ScrollView>
-      </View>
+      </PatternBackground>
     );
   }
 
@@ -269,13 +268,13 @@ export default function QuestionsScreen() {
   const progress = answeredCount / questions.length;
 
   return (
-    <View style={styles.container}>
+    <PatternBackground>
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
-        <View style={styles.logoWrap}>
+        <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-        </View>
+        </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Compatibility Quiz</Text>
           <Text style={styles.headerSub}>{answeredCount} of {questions.length} answered</Text>
@@ -354,7 +353,7 @@ export default function QuestionsScreen() {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </PatternBackground>
   );
 }
 

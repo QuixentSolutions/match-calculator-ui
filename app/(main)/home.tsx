@@ -185,9 +185,9 @@ export default function ConnectScreen() {
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
-        <View style={styles.logoWrap}>
+        <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-        </View>
+        </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Connect</Text>
           <Text style={styles.headerSub}>Link up with your partner</Text>

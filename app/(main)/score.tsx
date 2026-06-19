@@ -7,6 +7,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '../../api/client';
 import { ScoreResult } from '../../types';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme';
+import PatternBackground from '../../components/PatternBackground';
 
 interface ScoreConfig {
   label: string;
@@ -67,21 +68,19 @@ export default function ScoreScreen() {
   const config = getScoreConfig(score.compatibility);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
+    <PatternBackground>
       <StatusBar barStyle="light-content" />
 
       {/* Standard header */}
       <View style={styles.header}>
-        <View style={styles.logoWrap}>
+        <TouchableOpacity style={styles.logoWrap} onPress={() => router.replace('/(main)/home')} activeOpacity={0.8}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logoImg} resizeMode="cover" />
-        </View>
+        </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Compatibility Score</Text>
           <Text style={styles.headerSub}>Your match result</Text>
         </View>
-        <TouchableOpacity onPress={() => router.replace('/(main)/home')} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>‹ Home</Text>
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -168,7 +167,7 @@ export default function ScoreScreen() {
         </TouchableOpacity>
       </View>
       </ScrollView>
-    </View>
+    </PatternBackground>
   );
 }
 
